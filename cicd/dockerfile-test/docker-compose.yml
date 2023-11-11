@@ -1,0 +1,51 @@
+version: '3'
+volumes:
+  mysqlvol:
+  wpvol:
+networks:    
+  appnet:
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+  dbnet:
+    ipam:
+      config:
+        - subnet: 172.19.0.0/16
+  
+services:
+  web:
+    image: first-web:latest
+    ports:
+      - 8080:80
+    networks:    
+      - appnet     
+    depends_on: 
+      - app
+  db:
+     image: mysql
+     volumes: 
+       - mysqlvol:/var/lib/mysql
+     networks:
+       - dbnet
+     environment:
+          MYSQL_ROOT_PASSWORD: redhat
+          MYSQL_USER: munna
+          MYSQL_PASSWORD: rhel
+          MYSQL_DATABASE: wp
+  app:
+    image: wordpress
+    ports: 
+      - 8081:80
+    networks:
+      - appnet
+      - dbnet  
+    volumes:
+      - wpvol:/var/www/html 
+    environment:
+        WORDPRESS_DB_HOST: db
+        WORDPRESS_DB_USER: munna
+        WORDPRESS_DB_PASSWORD: rhel
+        WORDPRESS_DB_NAME: wp
+    depends_on:
+      - db    
+               
